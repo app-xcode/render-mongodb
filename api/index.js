@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGO_URI;
 
 // Pastikan client tidak dibuat di luar jika URI belum ada
 let client;
@@ -14,7 +14,7 @@ app.all('/api', async (req, res) => {
     try {
         // Cek apakah URI ada
         if (!uri) {
-            throw new Error("MONGODB_URI is not defined in Environment Variables");
+            throw new Error("MONGO_URI is not defined in Environment Variables");
         }
 
         if (!client) {
@@ -70,4 +70,5 @@ app.all('/api', async (req, res) => {
 });
 
 module.exports = app;
+
 
