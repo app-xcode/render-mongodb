@@ -96,7 +96,7 @@
 
         async function fetchData() {
             try {
-                const res = await fetch('?');
+                const res = await fetch('/api');
                 const data = await res.json();
                 
                 table.clear(); // Bersihkan data lama
