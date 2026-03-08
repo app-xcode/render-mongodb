@@ -37,13 +37,18 @@ app.post('/api', async (req, res) => {
     const db = client.db("iot_db");
     const collection = db.collection("sensor_data");
 
-    // Di dalam app.post('/api/sensor', ...)
-const newDoc = {
-      turbidity: Number(req.body.turbidity) || 0, 
-      ph: Number(req.body.ph) || 0,
-      temperature: Number(req.body.temperature) || 0,
+    const turbidity = req.body.turbidity !== undefined ? Number(req.body.turbidity) : null;
+    const ph = req.body.ph !== undefined ? Number(req.body.ph) : null;
+    const temperature = req.body.temperature !== undefined ? Number(req.body.temperature) : null;
+
+    console.log("Parsed Data:", { turbidity, ph, temperature });
+
+    const result = await collection.insertOne({
+      turbidity,
+      ph,
+      temperature,
       createdAt: new Date()
-    };
+    });
 
     res.status(201).json({ 
       message: "Data tersimpan!", 
@@ -56,6 +61,7 @@ const newDoc = {
 });
 
 module.exports = app;
+
 
 
 
