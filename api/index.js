@@ -38,9 +38,9 @@ app.post('/api', async (req, res) => {
     const collection = db.collection("sensor_data");
 
     const newDoc = {
-      turbidity: req.body.turbidity ? Number(req.body.turbidity) : 0,
-      ph: req.body.ph ? Number(req.body.ph) : 0,
-      temperature: req.body.temperatur ? Number(req.body.temperatur) : 0, // sesuaikan 'temperatur' (tanpa e)
+      turbidity: Number(req.body.turbidity),
+      ph: Number(req.body.ph),
+      temperature: Number(req.body.temp), // Gunakan 'temp' sesuai log kamu
       createdAt: new Date()
     };
 
@@ -57,6 +57,7 @@ app.post('/api', async (req, res) => {
 });
 
 module.exports = app;
+
 
 
 
