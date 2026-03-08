@@ -266,9 +266,9 @@
                     );
 
                     // Konversi ke Persentase agar bergelombang bersama
-                    sensorChart.data.datasets[0].data = chartData.map(d => ((d.turbidity || 0) / 1000 * 100).toFixed(1));
-                    sensorChart.data.datasets[1].data = chartData.map(d => ((d.ph || 0) / 14 * 100).toFixed(1));
-                    sensorChart.data.datasets[2].data = chartData.map(d => ((d.temperature || d.temp || 0) / 50 * 100).toFixed(1));
+                    sensorChart.data.datasets[0].data = chartData.map(d => ((d.turbidity || 0) / 1000 * 110).toFixed(1));
+                    sensorChart.data.datasets[1].data = chartData.map(d => ((d.ph || 0) / 14 * 110).toFixed(1));
+                    sensorChart.data.datasets[2].data = chartData.map(d => ((d.temperature || d.temp || 0) / 50 * 110).toFixed(1));
 
                     sensorChart.update();
                 }
