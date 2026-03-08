@@ -16,7 +16,7 @@ app.get('/api', (req, res) => {
 
 // 2. [GET] Menampilkan Data Sensor ke Browser
 // Akses: https://render-mongodb.vercel.app/api/sensor
-app.get('/api/sensor', async (req, res) => {
+app.get('/api?v1', async (req, res) => {
   try {
     await client.connect();
     const db = client.db("iot_db");
@@ -59,3 +59,4 @@ app.post('/api/sensor', async (req, res) => {
 });
 
 module.exports = app;
+
