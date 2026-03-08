@@ -75,7 +75,7 @@
     </div>
     <div class="max-w-6xl mx-auto">
         <div
-            class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
+            class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-4 mb-4 flex justify-between items-center border border-slate-200">
             <div>
                 <h2 class="text-xl font-bold">Monitoring Air</h2>
                 <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
@@ -89,28 +89,28 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div
-                class="bg-white dark:bg-slate-800 dark:border-slate-500 p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+                class="bg-white dark:bg-slate-800 dark:border-slate-500 p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-turbidity"></canvas>
                 <h3 class="font-bold text-blue-600 mt-2">TURBIDITY (NTU)</h3>
             </div>
             <div
-                class="bg-white dark:bg-slate-800 dark:border-slate-500 p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+                class="bg-white dark:bg-slate-800 dark:border-slate-500 p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-temp"></canvas>
                 <h3 class="font-bold text-orange-600 mt-2">TEMPERATUR (°C)</h3>
             </div>
             <div
-                class="bg-white dark:bg-slate-800 dark:border-slate-500 p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+                class="bg-white dark:bg-slate-800 dark:border-slate-500 p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-ph"></canvas>
                 <h3 class="font-bold text-emerald-600 mt-2">pH AIR</h3>
             </div>
         </div>
 
         <div
-            class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-6 mb-8 border border-slate-200">
+            class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-4 mb-4 border border-slate-200">
             <h3 class="text-slate-800 font-bold mb-4 flex items-center gap-2 dark:text-slate-100">
-                <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+                <span class="w-2 h-4 bg-blue-600 rounded-full"></span>
                 Tren Data Sensor (Real-time)
             </h3>
             <div class="h-[300px] w-full">
@@ -118,7 +118,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-6 border border-slate-200">
+        <div class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-4 border border-slate-200">
             <table id="iotTable" class="display responsive nowrap w-full" style="width:100%">
                 <thead class="bg-slate-100 dark:bg-slate-700">
                     <tr class="text-slate-500 text-xs bg-slate-100 dark:bg-slate-700">
@@ -140,26 +140,29 @@
     <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/master/gauge.min.js"></script>
 
     <script>
-        let table, gaugeTurb, gaugePH, gaugeTemp, sensorChart;
+        let table, gaugeTurb, gaugePH, gaugeTemp, sensorChart, isDarkMode;
+        const savedTheme = localStorage.getItem('theme');
+        isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const gaugePlate = isDarkMode ? '#1e293b' : '#ffffff';
 
         $(document).ready(function () {
             // 1. Inisialisasi Gauges
             gaugeTurb = new RadialGauge({
                 renderTo: 'gauge-turbidity', width: 180, height: 180, units: "NTU", minValue: 0, maxValue: 1000, value: 300,
                 majorTicks: ["0", "200", "400", "600", "800", "1000"], highlights: [{ "from": 600, "to": 1000, "color": "#fee2e2" }],
-                colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500
+                colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500, colorPlate: gaugePlate,
             }).draw();
 
             gaugePH = new RadialGauge({
                 renderTo: 'gauge-ph', width: 180, height: 180, units: "pH", minValue: 0, maxValue: 14, value: 7,
                 majorTicks: ["0", "2", "4", "6", "8", "10", "12", "14"],
                 highlights: [{ "from": 0, "to": 6.5, "color": "#fee2e2" }, { "from": 6.5, "to": 8.5, "color": "#dcfce7" }],
-                colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500
+                colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500, colorPlate: gaugePlate,
             }).draw();
 
             gaugeTemp = new LinearGauge({
                 renderTo: 'gauge-temp', width: 100, height: 180, units: "°C", minValue: -20, maxValue: 50, value: 25,
-                majorTicks: ["-20", "0", "20", "50"], colorPlate: "#fff", borders: false, animationDuration: 1500
+                majorTicks: ["-20", "0", "20", "50"], colorPlate: "#fff", borders: false, animationDuration: 1500, colorPlate: gaugePlate,
             }).draw();
 
             // 2. Inisialisasi DataTable
@@ -305,6 +308,7 @@
             // 3. Start Polling
             fetchData();
             setInterval(() => fetchData(true), 5000); // Live update tiap 5 detik
+            // Jalankan saat load
         });
 
         async function fetchData(isAuto = false) {
@@ -373,29 +377,65 @@
                 fetchData();
             }
         }
+        // Fungsi untuk mengecek dan menerapkan tema sistem
+        function applySystemTheme() {
+            const html = document.documentElement;
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            // Prioritas: 1. Pilihan manual user (jika ada), 2. Tema sistem
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                html.classList.add('dark');
+                updateUIIcon(true);
+            } else {
+                html.classList.remove('dark');
+                updateUIIcon(false);
+            }
+        }
+
+        function updateUIIcon(isDark) {
+            const icon = document.getElementById('dark-icon');
+            if (icon) icon.innerText = isDark ? '☀️' : '🌙';
+            syncVisualsWithTheme(isDark);
+        }
+
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            // Hanya berubah otomatis jika user belum pernah mengklik tombol manual
+            if (!localStorage.getItem('theme')) {
+                const newIsDark = e.matches;
+                document.documentElement.classList.toggle('dark', newIsDark);
+                updateUIIcon(newIsDark);
+
+                // Panggil fungsi update chart/gauge yang sudah kita buat sebelumnya
+                syncVisualsWithTheme(newIsDark);
+            }
+        });
         function toggleDarkMode() {
             const html = document.documentElement;
             const isDark = html.classList.toggle('dark');
-            document.getElementById('dark-icon').innerText = isDark ? '☀️' : '🌙';
 
-            // 1. Update Warna Chart
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-            const textColor = isDark ? '#94a3b8' : '#64748b';
+            // Simpan pilihan user agar sistem tidak menimpanya otomatis nanti
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
 
-            sensorChart.options.scales.y.grid.color = gridColor;
-            sensorChart.options.scales.x.grid.color = gridColor;
-            sensorChart.options.scales.y.ticks.color = textColor;
-            sensorChart.options.scales.x.ticks.color = textColor;
-            sensorChart.update();
+            updateUIIcon(isDark);
+            syncVisualsWithTheme(isDark);
+        }
 
-            // 2. Update Warna Gauge (Plate Background)
-            const gaugeBg = isDark ? '#1e293b' : '#ffffff';
-            const gaugeText = isDark ? '#f1f5f9' : '#000000';
-
+        // Fungsi pembantu untuk update Chart & Gauge (disatukan agar rapi)
+        function syncVisualsWithTheme(isDark) {
+            if (sensorChart) {
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                sensorChart.options.scales.y.grid.color = gridColor;
+                sensorChart.options.scales.x.grid.color = gridColor;
+                sensorChart.update();
+            }
             [gaugeTurb, gaugePH, gaugeTemp].forEach(g => {
-                g.update({ colorPlate: gaugeBg, colorNumbers: gaugeText, colorUnits: gaugeText });
+                if (g) g.update({ colorPlate: gaugePlate });
             });
         }
+
+        applySystemTheme();
+
     </script>
 </body>
 
