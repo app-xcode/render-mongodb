@@ -47,16 +47,20 @@ app.all('/api', async (req, res) => {
         }
 
         // 3. MENGHAPUS DATA (DELETE)
+        // 3. MENGHAPUS DATA (DELETE)
         if (req.method === 'DELETE') {
             const { id } = req.query;
-            if (!id) return res.status(400).json({ error: "ID dibutuhkan" });
-
-            const result = await collection.deleteOne({ _id: new ObjectId(id) });
-            
-            if (result.deletedCount === 1) {
-                return res.status(200).json({ message: "Berhasil dihapus" });
+        
+            if (id) {
+                // Hapus satu data berdasarkan ID
+                const result = await collection.deleteOne({ _id: new ObjectId(id) });
+                return res.status(200).json({ message: "Data berhasil dihapus" });
             } else {
-                return res.status(404).json({ error: "Data tidak ditemukan" });
+                // Hapus SEMUA data jika ID tidak disertakan
+                const result = await collection.deleteMany({});
+                return res.status(200).json({ 
+                    message: `Semua data (${result.deletedCount}) berhasil dibersihkan` 
+                });
             }
         }
 
@@ -70,5 +74,6 @@ app.all('/api', async (req, res) => {
 });
 
 module.exports = app;
+
 
 
