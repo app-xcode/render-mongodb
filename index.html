@@ -142,7 +142,7 @@
             sensorChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
+                   labels: ["-", "-", "-", "-", "-"],
                     datasets: [
                         {
                             label: "Turbidity",
@@ -156,7 +156,7 @@
                             borderWidth: 3,
                             backgroundColor: gradBlue,
                             fill: true,
-                            data: []
+                           data: [300, 100, 200, 500, 10], // Data awal nol
                         },
                         {
                             label: "pH Air",
@@ -170,7 +170,7 @@
                             borderWidth: 3,
                             backgroundColor: gradPink,
                             fill: true,
-                            data: []
+                          data: [7, 8, 9, 10, 11], // Data awal netral
                         },
                         {
                             label: "Suhu",
@@ -184,7 +184,7 @@
                             borderWidth: 3,
                             backgroundColor: gradOrange,
                             fill: true,
-                            data: []
+                            data: [25, 26, 27, 28, 29] // Data awal suhu
                         }
                     ]
                 },
