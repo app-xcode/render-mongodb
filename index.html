@@ -62,19 +62,35 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script>
         let table;
-        $(document).ready(function() {
+       $(document).ready(function() {
+            // Inisialisasi DataTable
             table = $('#iotTable').DataTable({
                 responsive: true,
                 order: [[0, 'desc']],
-                language: { search: "Cari:", lengthMenu: "Tampil _MENU_", info: "Total: _TOTAL_ data", paginate: { next: "»", previous: "«" } }
+                pageLength: 10,
+                language: { search: "Cari:", lengthMenu: "Tampil _MENU_", info: "Total: _TOTAL_ data" }
             });
+        
+            // Ambil data pertama kali
             fetchData();
+        
+            // --- KODE LIVE UPDATE START ---
+            // Fungsi ini akan menjalankan fetchData setiap 5000ms (5 detik)
+            setInterval(() => {
+                console.log("Auto Refreshing Data...");
+                fetchData(true); // Kirim parameter true agar tidak mengganggu fokus user
+            }, 5000); 
+            // --- KODE LIVE UPDATE END ---
         });
-
-        async function fetchData() {
+        
+        async function fetchData(isAuto = false) {
             try {
-                const res = await fetch('/api'); // Endpoint disesuaikan ke /api
+                const res = await fetch('/api');
                 const data = await res.json();
+                
+                // Simpan posisi scroll atau halaman jika sedang auto-refresh
+                const currentPage = table.page();
+        
                 table.clear();
                 data.forEach(item => {
                     const date = new Date(item.createdAt).toLocaleString('id-ID');
@@ -83,17 +99,22 @@
                     
                     table.row.add([
                         `<span class="text-slate-500 text-sm font-mono">${date}</span>`,
-                        `<span class="font-medium">${item.turbidity || 0} NTU</span>`,
+                        `<span class="font-medium text-slate-800">${item.turbidity || 0} NTU</span>`,
                         `<span class="${phStyle}">${ph}</span>`,
-                        `<span class="text-blue-500 font-medium">${item.temperature || item.temp || 0} °C</span>`,
-                        `<button onclick="deleteData('${item._id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-bold border border-red-200 transition-all">Hapus</button>`
+                        `<span class="text-blue-600 font-semibold">${item.temperature || item.temp || 0} °C</span>`,
+                        `<button onclick="deleteData('${item._id}')" class="bg-red-50 hover:bg-red-500 hover:text-white text-red-600 px-3 py-1 rounded-lg text-xs font-bold border border-red-200 transition-all duration-200">Hapus</button>`
                     ]);
                 });
-                table.draw();
-                document.getElementById('lastUpdate').innerText = "Update: " + new Date().toLocaleTimeString();
-            } catch (err) { console.error("Gagal ambil data:", err); }
+        
+                // Draw table, keep page if it's an auto-refresh
+                table.draw(isAuto ? false : true); 
+                
+                document.getElementById('lastUpdate').innerText = "Last Sync: " + new Date().toLocaleTimeString();
+            } catch (err) { 
+                console.error("Gagal ambil data:", err); 
+                document.getElementById('status').innerHTML = '<span class="text-red-500">Offline</span>';
+            }
         }
-
         async function deleteData(id) {
             if (confirm('Yakin ingin menghapus data ini?')) {
                 try {
