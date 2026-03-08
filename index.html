@@ -180,7 +180,20 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false } // Sesuai gayamu: legend disembunyikan
+                        legend: { display: false }, // Sesuai gayamu: legend disembunyikan
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.parsed.y;
+                                    // Kembalikan ke nilai asli saat di-hover
+                                    if (label === 'Turbidity') return label + ': ' + (value * 10).toFixed(0) + ' NTU';
+                                    if (label === 'pH Air') return label + ': ' + (value * 0.14).toFixed(1) + ' pH';
+                                    if (label === 'Suhu') return label + ': ' + (value * 0.5).toFixed(1) + ' °C';
+                                    return label + ': ' + value + '%';
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: {
@@ -189,13 +202,16 @@
                                 display: true,
                                 drawOnChartArea: true,
                                 drawTicks: false,
-                                borderDash: [5, 5]
+                                borderDash: [5, 5],
+                                min: 0,
+                                max: 100, // Kunci di 100%
                             },
                             ticks: {
                                 display: true,
                                 padding: 10,
                                 color: '#b2b9bf',
                                 font: { size: 11, family: "Open Sans", style: 'normal', lineHeight: 2 },
+                                callback: function (value) { return value + "%" }
                             }
                         },
                         x: {
@@ -237,12 +253,17 @@
                     // Kita ambil 15 data terakhir saja agar chart tidak penuh
                     const chartData = [...data].reverse().slice(-15);
 
-                    sensorChart.data.labels = chartData.map(d => new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-                    sensorChart.data.datasets[0].data = chartData.map(d => d.turbidity || 0);
-                    sensorChart.data.datasets[1].data = chartData.map(d => d.ph || 0);
-                    sensorChart.data.datasets[2].data = chartData.map(d => d.temperature || d.temp || 0);
+                    // Label waktu tetap sama
+                    sensorChart.data.labels = chartData.map(d =>
+                        new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    );
 
-                    sensorChart.update('none'); // Update chart tanpa animasi berlebihan agar mulus
+                    // Konversi ke Persentase agar bergelombang bersama
+                    sensorChart.data.datasets[0].data = chartData.map(d => ((d.turbidity || 0) / 1000 * 100).toFixed(1));
+                    sensorChart.data.datasets[1].data = chartData.map(d => ((d.ph || 0) / 14 * 100).toFixed(1));
+                    sensorChart.data.datasets[2].data = chartData.map(d => ((d.temperature || d.temp || 0) / 50 * 100).toFixed(1));
+
+                    sensorChart.update();
                 }
 
                 table.clear();
