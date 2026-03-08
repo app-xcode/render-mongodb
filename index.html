@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,25 +9,39 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
     <style>
-        .dataTables_wrapper .dataTables_filter input { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; outline: none; margin-bottom: 10px; }
-        table.dataTable thead th { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0 !important; }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        table.dataTable thead th {
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
 
     <div class="max-w-6xl mx-auto">
-         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
-                <div>
-                    <h2 class="text-xl font-bold">Monitoring Air</h2>
-                    <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="clearAllData()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-500 hover:text-white transition-all">Clear All</button>
-                    <button onclick="fetchData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all">Refresh</button>
-                </div>
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
+            <div>
+                <h2 class="text-xl font-bold">Monitoring Air</h2>
+                <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
             </div>
-        
+            <div class="flex gap-2">
+                <button onclick="clearAllData()"
+                    class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-500 hover:text-white transition-all">Clear
+                    All</button>
+                <button onclick="fetchData()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all">Refresh</button>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-turbidity"></canvas>
@@ -52,7 +67,7 @@
             </div>
         </div>
 
-          <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
             <table id="iotTable" class="display responsive nowrap w-full" style="width:100%">
                 <thead>
                     <tr class="text-slate-500 text-xs">
@@ -74,26 +89,26 @@
     <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/master/gauge.min.js"></script>
 
     <script>
-        let table, gaugeTurb, gaugePH, gaugeTemp, sensorChart; 
+        let table, gaugeTurb, gaugePH, gaugeTemp, sensorChart;
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             // 1. Inisialisasi Gauges
             gaugeTurb = new RadialGauge({
                 renderTo: 'gauge-turbidity', width: 180, height: 180, units: "NTU", minValue: 0, maxValue: 1000,
-                majorTicks: ["0","200","400","600","800","1000"], highlights: [{ "from": 600, "to": 1000, "color": "#fee2e2" }],
+                majorTicks: ["0", "200", "400", "600", "800", "1000"], highlights: [{ "from": 600, "to": 1000, "color": "#fee2e2" }],
                 colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500
             }).draw();
 
             gaugePH = new RadialGauge({
                 renderTo: 'gauge-ph', width: 180, height: 180, units: "pH", minValue: 0, maxValue: 14,
-                majorTicks: ["0","2","4","6","8","10","12","14"],
+                majorTicks: ["0", "2", "4", "6", "8", "10", "12", "14"],
                 highlights: [{ "from": 0, "to": 6.5, "color": "#fee2e2" }, { "from": 6.5, "to": 8.5, "color": "#dcfce7" }],
                 colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500
             }).draw();
 
             gaugeTemp = new LinearGauge({
                 renderTo: 'gauge-temp', width: 100, height: 180, units: "°C", minValue: -20, maxValue: 50,
-                majorTicks: ["-20","0","20","50"], colorPlate: "#fff", borders: false, animationDuration: 1500
+                majorTicks: ["-20", "0", "20", "50"], colorPlate: "#fff", borders: false, animationDuration: 1500
             }).draw();
 
             // 2. Inisialisasi DataTable
@@ -103,48 +118,104 @@
                 language: { search: "Cari:", lengthMenu: "Tampil _MENU_" }
             });
 
-            const ctx = document.getElementById('sensorChart').getContext('2d');
-    sensorChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [], // Akan diisi waktu
-            datasets: [
-                {
-                    label: 'Turbidity',
-                    data: [],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    fill: true,
-                    tension: 0.4 // Membuat garis melengkung seperti gambar
+            const targets = document.getElementById('sensorChart');
+            const ctx = targets.getContext("2d");
+
+            // 1. Create Gradients
+            // Turbidity (Biru)
+            const gradBlue = ctx.createLinearGradient(0, 230, 0, 50);
+            gradBlue.addColorStop(1, 'rgba(59, 130, 246, 0.4)');
+            gradBlue.addColorStop(0.2, 'rgba(59, 130, 246, 0.1)');
+            gradBlue.addColorStop(0, 'rgba(59, 130, 246, 0)');
+
+            // pH (Pink/Rose sesuai gaya kodemu)
+            const gradPink = ctx.createLinearGradient(0, 230, 0, 50);
+            gradPink.addColorStop(1, '#fe2a9054');
+            gradPink.addColorStop(0.2, '#fe2a9010');
+            gradPink.addColorStop(0, '#fe2a9000');
+
+            // Temp (Orange)
+            const gradOrange = ctx.createLinearGradient(0, 230, 0, 50);
+            gradOrange.addColorStop(1, '#ffae4a54');
+            gradOrange.addColorStop(0.2, '#ffae4a10');
+            gradOrange.addColorStop(0, '#ffae4a00');
+            sensorChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: "Turbidity",
+                            tension: 0.4,
+                            pointRadius: 0,
+                            borderColor: "#3b82f6",
+                            borderWidth: 3,
+                            backgroundColor: gradBlue,
+                            fill: true,
+                            data: []
+                        },
+                        {
+                            label: "pH Air",
+                            tension: 0.4,
+                            pointRadius: 0,
+                            borderColor: "#fe2a90",
+                            borderWidth: 3,
+                            backgroundColor: gradPink,
+                            fill: true,
+                            data: []
+                        },
+                        {
+                            label: "Suhu",
+                            tension: 0.4,
+                            pointRadius: 0,
+                            borderColor: "#ffae4a",
+                            borderWidth: 3,
+                            backgroundColor: gradOrange,
+                            fill: true,
+                            data: []
+                        }
+                    ]
                 },
-                {
-                    label: 'pH Air',
-                    data: [],
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Suhu',
-                    data: [],
-                    borderColor: '#f59e0b',
-                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                    fill: true,
-                    tension: 0.4
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false } // Sesuai gayamu: legend disembunyikan
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                drawBorder: false,
+                                display: true,
+                                drawOnChartArea: true,
+                                drawTicks: false,
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                display: true,
+                                padding: 10,
+                                color: '#b2b9bf',
+                                font: { size: 11, family: "Open Sans", style: 'normal', lineHeight: 2 },
+                            }
+                        },
+                        x: {
+                            grid: {
+                                drawBorder: false,
+                                display: false,
+                                drawOnChartArea: false,
+                                drawTicks: false,
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                display: true,
+                                color: '#b2b9bf',
+                                padding: 20,
+                                font: { size: 11, family: "Open Sans", style: 'normal', lineHeight: 2 },
+                            }
+                        }
+                    }
                 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'top' } },
-            scales: {
-                y: { beginAtZero: true, grid: { display: false } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
+            });
 
             // 3. Start Polling
             fetchData();
@@ -155,22 +226,22 @@
             try {
                 const res = await fetch('/api');
                 const data = await res.json();
-                
+
                 if (data.length > 0) {
-                   const latest = data[0];
+                    const latest = data[0];
                     gaugeTurb.value = latest.turbidity || 0;
                     gaugePH.value = latest.ph || 0;
                     gaugeTemp.value = latest.temperature || latest.temp || 0;
-        
+
                     // --- UPDATE CHART ---
                     // Kita ambil 15 data terakhir saja agar chart tidak penuh
-                    const chartData = [...data].reverse().slice(-15); 
-                    
-                    sensorChart.data.labels = chartData.map(d => new Date(d.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+                    const chartData = [...data].reverse().slice(-15);
+
+                    sensorChart.data.labels = chartData.map(d => new Date(d.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
                     sensorChart.data.datasets[0].data = chartData.map(d => d.turbidity || 0);
                     sensorChart.data.datasets[1].data = chartData.map(d => d.ph || 0);
                     sensorChart.data.datasets[2].data = chartData.map(d => d.temperature || d.temp || 0);
-                    
+
                     sensorChart.update('none'); // Update chart tanpa animasi berlebihan agar mulus
                 }
 
@@ -205,4 +276,5 @@
         }
     </script>
 </body>
+
 </html>
