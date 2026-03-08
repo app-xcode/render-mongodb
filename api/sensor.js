@@ -1,21 +1,26 @@
-const { MongoClient } = require('mongodb');
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
-
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     await client.connect();
     const db = client.db("iot_db");
     const collection = db.collection("sensor_data");
 
     if (req.method === 'POST') {
-      await collection.insertOne(req.body);
-      res.status(201).json({ message: "Data tersimpan!" });
+      // LOGIKA SIMPAN DATA
+      const result = await collection.insertOne({
+        ...req.body,
+        createdAt: new Date()
+      });
+      return res.status(201).json({ message: "Data tersimpan!", id: result.insertedId });
+
+    } else if (req.method === 'GET') {
+      // LOGIKA AMBIL DATA (Agar tidak muncul error di browser)
+      const data = await collection.find({}).sort({ createdAt: -1 }).limit(10).toArray();
+      return res.status(200).json(data);
+
     } else {
-      const data = await collection.find({}).limit(10).toArray();
-      res.status(200).json(data);
+      return res.status(405).json({ message: "Metode tidak didukung" });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
-};
+}
