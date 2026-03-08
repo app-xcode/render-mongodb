@@ -381,6 +381,7 @@
         function applySystemTheme() {
             const html = document.documentElement;
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('theme');
 
             // Prioritas: 1. Pilihan manual user (jika ada), 2. Tema sistem
             if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
@@ -429,6 +430,7 @@
                 sensorChart.options.scales.x.grid.color = gridColor;
                 sensorChart.update();
             }
+            const gaugePlate = isDarkMode ? '#1e293b' : '#ffffff';
             [gaugeTurb, gaugePH, gaugeTemp].forEach(g => {
                 if (g) g.update({ colorPlate: gaugePlate });
             });
