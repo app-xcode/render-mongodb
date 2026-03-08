@@ -38,12 +38,12 @@ app.post('/api', async (req, res) => {
     const collection = db.collection("sensor_data");
 
     // Di dalam app.post('/api/sensor', ...)
-const result = await collection.insertOne({
-  turbidity: Number(req.body.turbidity),
-  ph: Number(req.body.ph),
-  temperature: Number(req.body.temperature),
-  createdAt: new Date()
-});
+const newDoc = {
+      turbidity: Number(req.body.turbidity) || 0, 
+      ph: Number(req.body.ph) || 0,
+      temperature: Number(req.body.temperature) || 0,
+      createdAt: new Date()
+    };
 
     res.status(201).json({ 
       message: "Data tersimpan!", 
@@ -56,6 +56,7 @@ const result = await collection.insertOne({
 });
 
 module.exports = app;
+
 
 
 
