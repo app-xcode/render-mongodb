@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const app = express();
 
@@ -9,13 +9,34 @@ app.use(express.json());
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
+// Handler untuk menghapus data
+app.delete('/api', async (req, res) => {
+  try {
+    const { id } = req.query; // Mengambil ID dari URL (?id=xxxx)
+    
+    if (!id) {
+      return res.status(400).json({ error: "ID tidak ditemukan" });
+    }
+
+    await client.connect();
+    const db = client.db("iot_db");
+    
+    const result = await db.collection("sensor_data").deleteOne({
+      _id: new ObjectId(id) // Mengonversi string ID menjadi format MongoDB ObjectId
+    });
+
+    if (result.deletedCount === 1) {
+      res.status(200).json({ message: "Data berhasil dihapus" });
+    } else {
+      res.status(404).json({ error: "Data tidak ditemukan di database" });
+    }
+  } catch (error) {
+    console.error("Delete Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // 1. [GET] Cek Status API
 app.get('/api', async (req, res) => {
-  if (req.method === 'DELETE') {
-    const { id } = req.query;
-    await db.collection("sensor_data").deleteOne({ _id: new ObjectId(id) });
-    return res.status(200).json({ message: "Deleted" });
-}
   try {
     await client.connect();
     const db = client.db("iot_db");
@@ -62,6 +83,7 @@ app.post('/api', async (req, res) => {
 });
 
 module.exports = app;
+
 
 
 
