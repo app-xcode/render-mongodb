@@ -50,7 +50,7 @@
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
+<body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors">
     <div class="flex items-center gap-4 fixed top-4 right-4 z-50">
         <button onclick="toggleDarkMode()"
             class="p-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-yellow-400 transition-all">
@@ -58,7 +58,7 @@
         </button>
     </div>
     <div class="max-w-6xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
+        <div class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
             <div>
                 <h2 class="text-xl font-bold">Monitoring Air</h2>
                 <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
@@ -73,21 +73,21 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+            <div class="bg-white dark:bg-slate-800 dark:border-slate-500 p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-turbidity"></canvas>
                 <h3 class="font-bold text-blue-600 mt-2">TURBIDITY (NTU)</h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+            <div class="bg-white dark:bg-slate-800 dark:border-slate-500 p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-ph"></canvas>
                 <h3 class="font-bold text-emerald-600 mt-2">pH AIR</h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+            <div class="bg-white dark:bg-slate-800 dark:border-slate-500 p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-temp"></canvas>
                 <h3 class="font-bold text-orange-600 mt-2">TEMPERATUR (°C)</h3>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-slate-200">
+        <div class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-6 mb-8 border border-slate-200">
             <h3 class="text-slate-800 font-bold mb-4 flex items-center gap-2">
                 <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
                 Tren Data Sensor (Real-time)
@@ -97,10 +97,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+        <div class="bg-white dark:bg-slate-800 dark:border-slate-500 rounded-2xl shadow-sm p-6 border border-slate-200">
             <table id="iotTable" class="display responsive nowrap w-full" style="width:100%">
-                <thead>
-                    <tr class="text-slate-500 text-xs">
+                <thead class="bg-slate-100 dark:bg-slate-700">
+                    <tr class="text-slate-500 text-xs bg-slate-100 dark:bg-slate-700">
                         <th>TURBIDITY</th>
                         <th>pH</th>
                         <th>SUHU</th>
