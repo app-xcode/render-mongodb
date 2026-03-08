@@ -208,11 +208,13 @@
                             callbacks: {
                                 label: function (context) {
                                     let label = context.dataset.label || '';
-                                    let val = context.parsed.y;
-                                    // Konversi balik dari % ke nilai asli untuk tooltip
-                                    if (label === 'Turbidity') return label + ': ' + (val * 10).toFixed(0) + ' NTU';
-                                    if (label === 'pH Air') return label + ': ' + (val * 0.14).toFixed(1) + ' pH';
-                                    if (label === 'Suhu') return label + ': ' + (val * 0.5).toFixed(1) + ' °C';
+                                    let val = context.parsed.y; // Ini sudah nilai asli (NTU, pH, atau °C)
+
+                                    // Cukup tambahkan satuan di belakangnya saja
+                                    if (label === 'Turbidity') return label + ': ' + val.toFixed(0) + ' NTU';
+                                    if (label === 'pH Air') return label + ': ' + val.toFixed(1) + ' pH';
+                                    if (label === 'Suhu') return label + ': ' + val.toFixed(1) + ' °C';
+
                                     return label + ': ' + val;
                                 }
                             }
