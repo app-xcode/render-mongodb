@@ -11,6 +11,11 @@ const client = new MongoClient(uri);
 
 // 1. [GET] Cek Status API
 app.get('/api', async (req, res) => {
+  if (req.method === 'DELETE') {
+    const { id } = req.query;
+    await db.collection("sensor_data").deleteOne({ _id: new ObjectId(id) });
+    return res.status(200).json({ message: "Deleted" });
+}
   try {
     await client.connect();
     const db = client.db("iot_db");
@@ -57,6 +62,7 @@ app.post('/api', async (req, res) => {
 });
 
 module.exports = app;
+
 
 
 
