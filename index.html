@@ -218,23 +218,22 @@
                     },
                     scales: {
                         y: {
-                            min: 0,
-                            max: 110,
-                            grid: {
-                                drawBorder: false,
-                                display: true,
-                                color: 'rgba(0, 0, 0, 0.05)', // Garis Horizontal
-                                borderDash: [5, 5]
-                            },
-                            ticks: { padding: 10, color: '#94a3b8' }
+                            type: 'linear',
+                            display: true,
+                            position: 'left', // Sumbu untuk Turbidity
+                            title: { display: true, text: 'NTU' },
+                            min: 0, max: 1000
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right', // Sumbu untuk pH & Suhu
+                            grid: { drawOnChartArea: false }, // Agar grid tidak tumpang tindih
+                            title: { display: true, text: 'pH & Temp' },
+                            min: 0, max: 50
                         },
                         x: {
-                            grid: {
-                                display: true, // AKTIFKAN GRID VERTIKAL
-                                color: 'rgba(0, 0, 0, 0.05)',
-                                borderDash: [5, 5]
-                            },
-                            ticks: { padding: 10, color: '#94a3b8' }
+                            grid: { display: true, borderDash: [5, 5] }
                         }
                     }
                 }
