@@ -17,8 +17,8 @@
     <div class="max-w-6xl mx-auto">
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border border-slate-200">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">Monitoring Kualitas Air</h1>
-                <p class="text-slate-500 text-sm">Real-time data dari Vercel & MongoDB</p>
+                <h1 class="text-2xl font-bold text-slate-800">📊 Monitoring Kualitas Air</h1>
+                <p class="text-slate-500 text-sm">Endpoint: /api | MongoDB Atlas</p>
             </div>
             <div class="flex items-center gap-4 text-right">
                 <div>
@@ -31,7 +31,7 @@
                     </div>
                     <p id="lastUpdate" class="text-xs text-slate-400 italic">Memperbarui...</p>
                 </div>
-                <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg transition-all active:scale-95">Refresh</button>
+                <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg transition-all active:scale-95 text-sm font-semibold">Refresh</button>
             </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
@@ -42,12 +42,14 @@
                         <th>Turbidity</th>
                         <th>pH Air</th>
                         <th>Suhu</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
@@ -60,27 +62,45 @@
                 language: { search: "Cari:", lengthMenu: "Tampil _MENU_", info: "Total: _TOTAL_ data", paginate: { next: "»", previous: "«" } }
             });
             fetchData();
-            setInterval(fetchData, 15000);
         });
+
         async function fetchData() {
             try {
-                const res = await fetch('/api');
+                const res = await fetch('/api'); // Endpoint disesuaikan ke /api
                 const data = await res.json();
                 table.clear();
                 data.forEach(item => {
                     const date = new Date(item.createdAt).toLocaleString('id-ID');
                     const ph = item.ph || 0;
                     const phStyle = (ph < 6.5 || ph > 8.5) ? 'text-red-500 font-bold' : 'text-slate-700';
+                    
                     table.row.add([
                         `<span class="text-slate-500 text-sm font-mono">${date}</span>`,
                         `<span class="font-medium">${item.turbidity || 0} NTU</span>`,
                         `<span class="${phStyle}">${ph}</span>`,
-                        `<span class="text-blue-500 font-medium">${item.temperature || item.temp || 0} °C</span>`
+                        `<span class="text-blue-500 font-medium">${item.temperature || item.temp || 0} °C</span>`,
+                        `<button onclick="deleteData('${item._id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-bold border border-red-200 transition-all">Hapus</button>`
                     ]);
                 });
                 table.draw();
                 document.getElementById('lastUpdate').innerText = "Update: " + new Date().toLocaleTimeString();
-            } catch (err) { console.error("Gagal:", err); }
+            } catch (err) { console.error("Gagal ambil data:", err); }
+        }
+
+        async function deleteData(id) {
+            if (confirm('Yakin ingin menghapus data ini?')) {
+                try {
+                    const res = await fetch(`/api?id=${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        alert('Data berhasil dihapus');
+                        fetchData();
+                    } else {
+                        alert('Gagal menghapus data');
+                    }
+                } catch (err) {
+                    console.error("Error delete:", err);
+                }
+            }
         }
     </script>
 </body>
