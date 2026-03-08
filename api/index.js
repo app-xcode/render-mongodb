@@ -9,37 +9,53 @@ app.use(express.json());
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
-// 1. Rute untuk mengetes apakah API jalan (Mencegah "Cannot GET /api/")
+// 1. [GET] Cek Status API
 app.get('/api', (req, res) => {
   res.json({ message: "API Backend IoT Berhasil Diakses!" });
 });
 
-// 2. Rute untuk mengambil data sensor (GET /api/sensor)
+// 2. [GET] Menampilkan Data Sensor ke Browser
+// Akses: https://render-mongodb.vercel.app/api/sensor
 app.get('/api/sensor', async (req, res) => {
   try {
     await client.connect();
     const db = client.db("iot_db");
-    const data = await db.collection("sensor_data").find().sort({createdAt: -1}).limit(10).toArray();
-    res.json(data);
+    const collection = db.collection("sensor_data");
+
+    // Ambil 20 data terbaru berdasarkan waktu (createdAt)
+    const data = await collection.find({})
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .toArray();
+
+    res.status(200).json(data);
   } catch (error) {
+    console.error("Error GET:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 3. Rute untuk simpan data sensor (POST /api/sensor)
+// 3. [POST] Menerima Data dari ESP32/Alat
+// Akses: https://render-mongodb.vercel.app/api/sensor
 app.post('/api/sensor', async (req, res) => {
   try {
     await client.connect();
     const db = client.db("iot_db");
-    const result = await db.collection("sensor_data").insertOne({
-      ...req.body,
+    const collection = db.collection("sensor_data");
+
+    const result = await collection.insertOne({
+      ...req.body, // Berisi turbidity, ph, temp dari alat
       createdAt: new Date()
     });
-    res.status(201).json({ message: "Data tersimpan!", id: result.insertedId });
+
+    res.status(201).json({ 
+      message: "Data tersimpan!", 
+      id: result.insertedId 
+    });
   } catch (error) {
+    console.error("Error POST:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// PENTING: Jangan pakai app.listen() di Vercel!
 module.exports = app;
