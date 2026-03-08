@@ -146,6 +146,7 @@
                     datasets: [
                         {
                             label: "Turbidity",
+                            yAxisID: 'y', // Gunakan sumbu kiri (0-1000)
                             tension: 0.4,
                             pointRadius: 4, // Ubah jadi 4 agar titik terlihat
                             pointBackgroundColor: "#3b82f6",
@@ -159,6 +160,7 @@
                         },
                         {
                             label: "pH Air",
+                            yAxisID: 'y1', // Gunakan sumbu kanan (0-50 agar pH & Temp terlihat jelas)
                             tension: 0.4,
                             pointRadius: 4,
                             pointBackgroundColor: "#fe2a90",
@@ -172,6 +174,7 @@
                         },
                         {
                             label: "Suhu",
+                            yAxisID: 'y1', // Sama dengan pH, gunakan sumbu kanan
                             tension: 0.4,
                             pointRadius: 4,
                             pointBackgroundColor: "#ffae4a",
@@ -216,20 +219,23 @@
                         }
                     },
                     scales: {
-                        y: {
+                        y: { // SUMBU KIRI (Turbidity)
                             type: 'linear',
                             display: true,
-                            position: 'left', // Sumbu untuk Turbidity
+                            position: 'left',
+                            min: 0,
+                            max: 1000,
                             title: { display: true, text: 'NTU' },
-                            min: 0, max: 1000
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
                         },
-                        y1: {
+                        y1: { // SUMBU KANAN (pH & Suhu)
                             type: 'linear',
                             display: true,
-                            position: 'right', // Sumbu untuk pH & Suhu
-                            grid: { drawOnChartArea: false }, // Agar grid tidak tumpang tindih
-                            title: { display: true, text: 'pH & Temp' },
-                            min: 0, max: 50
+                            position: 'right',
+                            min: 0,
+                            max: 50, // pH (max 14) dan Suhu (max 50) akan terlihat proporsional di sini
+                            title: { display: true, text: 'pH / °C' },
+                            grid: { drawOnChartArea: false }, // Agar garis grid tidak tabrakan
                         },
                         x: {
                             grid: { display: true, borderDash: [5, 5] }
@@ -264,9 +270,10 @@
                     );
 
                     // Konversi ke Persentase agar bergelombang bersama
-                    sensorChart.data.datasets[0].data = chartData.map(d => ((d.turbidity || 0) / 1000 * 100).toFixed(1));
-                    sensorChart.data.datasets[1].data = chartData.map(d => ((d.ph || 0) / 14 * 100).toFixed(1));
-                    sensorChart.data.datasets[2].data = chartData.map(d => ((d.temperature || d.temp || 0) / 50 * 100).toFixed(1));
+                    // Di dalam fetchData()...
+                    sensorChart.data.datasets[0].data = chartData.map(d => d.turbidity || 0); // Nilai asli NTU
+                    sensorChart.data.datasets[1].data = chartData.map(d => d.ph || 0);        // Nilai asli pH
+                    sensorChart.data.datasets[2].data = chartData.map(d => d.temperature || d.temp || 0); // Nilai asli Celcius
 
                     sensorChart.update();
                 }
