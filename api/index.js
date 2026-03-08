@@ -31,7 +31,7 @@ app.get('/api', async (req, res) => {
 
 // 3. [POST] Menerima Data dari ESP32/Alat
 // Akses: https://render-mongodb.vercel.app/api/sensor
-app.post('/api/sensor', async (req, res) => {
+app.post('/api', async (req, res) => {
   try {
     await client.connect();
     const db = client.db("iot_db");
@@ -53,5 +53,6 @@ app.post('/api/sensor', async (req, res) => {
 });
 
 module.exports = app;
+
 
 
