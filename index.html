@@ -17,7 +17,7 @@
     <div class="max-w-6xl mx-auto">
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border border-slate-200">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">📊 Monitoring Kualitas Air</h1>
+                <h1 class="text-2xl font-bold text-slate-800">Monitoring Kualitas Air</h1>
                 <p class="text-slate-500 text-sm">Endpoint: /api | MongoDB Atlas</p>
             </div>
             <div class="flex items-center gap-4 text-right">
@@ -27,11 +27,18 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                         </span>
-                        Sistem Online
+                        Online
                     </div>
                     <p id="lastUpdate" class="text-xs text-slate-400 italic">Memperbarui...</p>
                 </div>
-                <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg transition-all active:scale-95 text-sm font-semibold">Refresh</button>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearAllData()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl shadow-md transition-all active:scale-95 text-sm font-semibold">
+                        Clear All
+                    </button>
+                    <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg transition-all active:scale-95 text-sm font-semibold">
+                        Refresh
+                    </button>
+                </div>
             </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
@@ -99,6 +106,23 @@
                     }
                 } catch (err) {
                     console.error("Error delete:", err);
+                }
+            }
+        }
+        async function clearAllData() {
+            if (confirm('PERINGATAN: Semua data sensor akan dihapus permanen. Lanjutkan?')) {
+                try {
+                    const res = await fetch('/api', { method: 'DELETE' }); // Panggil tanpa query ID
+                    const result = await res.json();
+                    
+                    if (res.ok) {
+                        alert(result.message);
+                        fetchData(); // Refresh tabel
+                    } else {
+                        alert('Gagal membersihkan data: ' + result.error);
+                    }
+                } catch (err) {
+                    console.error("Error Clear All:", err);
                 }
             }
         }
