@@ -42,14 +42,14 @@
             </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
-            <table id="iotTable" class="display responsive nowrap w-full text-slate-700" style="width:100%">
+          <table id="iotTable" class="display responsive nowrap w-full text-slate-700" style="width:100%">
                 <thead>
-                    <tr class="text-left uppercase text-xs font-bold text-slate-500 tracking-wider">
-                        <th>Waktu (WIB)</th>
-                        <th>Turbidity</th>
-                        <th>pH Air</th>
-                        <th>Suhu</th>
-                        <th>Aksi</th>
+                    <tr class="text-left uppercase text-[10px] font-bold text-slate-400 tracking-widest border-b border-slate-100">
+                        <th class="px-4 py-4 text-blue-600">Turbidity (NTU)</th>
+                        <th class="px-4 py-4 text-emerald-600">pH Air</th>
+                        <th class="px-4 py-4 text-orange-600">Suhu (°C)</th>
+                        <th class="px-4 py-4">Waktu Check</th>
+                        <th class="px-4 py-4">Opsi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -83,38 +83,43 @@
             // --- KODE LIVE UPDATE END ---
         });
         
-        async function fetchData(isAuto = false) {
-            try {
-                const res = await fetch('/api');
-                const data = await res.json();
-                
-                // Simpan posisi scroll atau halaman jika sedang auto-refresh
-                const currentPage = table.page();
-        
-                table.clear();
-                data.forEach(item => {
-                    const date = new Date(item.createdAt).toLocaleString('id-ID');
-                    const ph = item.ph || 0;
-                    const phStyle = (ph < 6.5 || ph > 8.5) ? 'text-red-500 font-bold' : 'text-slate-700';
+       async function fetchData(isAuto = false) {
+                try {
+                    const res = await fetch('/api');
+                    const data = await res.json();
                     
-                    table.row.add([
-                        `<span class="text-slate-500 text-sm font-mono">${date}</span>`,
-                        `<span class="font-medium text-slate-800">${item.turbidity || 0} NTU</span>`,
-                        `<span class="${phStyle}">${ph}</span>`,
-                        `<span class="text-blue-600 font-semibold">${item.temperature || item.temp || 0} °C</span>`,
-                        `<button onclick="deleteData('${item._id}')" class="bg-red-50 hover:bg-red-500 hover:text-white text-red-600 px-3 py-1 rounded-lg text-xs font-bold border border-red-200 transition-all duration-200">Hapus</button>`
-                    ]);
-                });
-        
-                // Draw table, keep page if it's an auto-refresh
-                table.draw(isAuto ? false : true); 
-                
-                document.getElementById('lastUpdate').innerText = "Last Sync: " + new Date().toLocaleTimeString();
-            } catch (err) { 
-                console.error("Gagal ambil data:", err); 
-                document.getElementById('status').innerHTML = '<span class="text-red-500">Offline</span>';
+                    table.clear();
+                    data.forEach(item => {
+                        const date = new Date(item.createdAt).toLocaleString('id-ID', {
+                            dateStyle: 'short',
+                            timeStyle: 'short'
+                        });
+                        
+                        const ph = item.ph || 0;
+                        const turbidity = item.turbidity || 0;
+                        const temp = item.temperature || item.temp || 0;
+            
+                        // Logika Warna Prioritas
+                        const phClass = (ph < 6.5 || ph > 8.5) ? 'text-red-600 font-extrabold' : 'text-slate-900 font-bold';
+                        const turbClass = (turbidity > 50) ? 'text-amber-600 font-extrabold' : 'text-slate-900 font-bold';
+            
+                        table.row.add([
+                            `<span class="text-lg ${turbClass}">${turbidity}</span>`,
+                            `<span class="text-lg ${phClass}">${ph}</span>`,
+                            `<span class="text-lg font-bold text-slate-900">${temp}°</span>`,
+                            `<span class="text-xs text-slate-400 font-mono">${date}</span>`,
+                            `<button onclick="deleteData('${item._id}')" class="text-red-400 hover:text-red-600 transition-colors text-xs font-semibold underline">Hapus</button>`
+                        ]);
+                    });
+            
+                    // 'false' agar saat auto-refresh, posisi paging user tidak balik ke halaman 1
+                    table.draw(false); 
+                    document.getElementById('lastUpdate').innerText = "Sync: " + new Date().toLocaleTimeString();
+                } catch (err) { 
+                    console.error("Fetch error:", err); 
+                }
             }
-        }
+                    
         async function deleteData(id) {
             if (confirm('Yakin ingin menghapus data ini?')) {
                 try {
