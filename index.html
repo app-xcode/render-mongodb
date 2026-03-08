@@ -3,69 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard IoT Monitoring</title>
+    <title>IoT Dashboard - Monitoring Air</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
     <style>
         .dataTables_wrapper .dataTables_filter input { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; outline: none; margin-bottom: 10px; }
-        .dataTables_wrapper .dataTables_length select { border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.2rem 1rem; }
-        table.dataTable thead th { border-bottom: 1px solid #f1f5f9 !important; background-color: #f8fafc; }
+        table.dataTable thead th { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0 !important; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-10">
+<body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
+
     <div class="max-w-6xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border border-slate-200">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800">Monitoring Kualitas Air</h1>
-                <p class="text-slate-500 text-sm">Endpoint: /api | MongoDB Atlas</p>
-            </div>
-            <div class="flex items-center gap-4 text-right">
-                <div>
-                    <div id="status" class="text-green-500 font-semibold flex items-center gap-2 justify-end">
-                        <span class="relative flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        Online
-                    </div>
-                    <p id="lastUpdate" class="text-xs text-slate-400 italic">Memperbarui...</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="clearAllData()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl shadow-md transition-all active:scale-95 text-sm font-semibold">
-                        Clear All
-                    </button>
-                    <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg transition-all active:scale-95 text-sm font-semibold">
-                        Refresh
-                    </button>
-                </div>
-            </div>
-        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 flex flex-col items-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-turbidity"></canvas>
-                <h3 class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2">Turbidity</h3>
+                <h3 class="font-bold text-blue-600 mt-2">TURBIDITY (NTU)</h3>
             </div>
-        
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 flex flex-col items-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-ph"></canvas>
-                <h3 class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2">pH Air</h3>
+                <h3 class="font-bold text-emerald-600 mt-2">pH AIR</h3>
             </div>
-        
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 flex flex-col items-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-temp"></canvas>
-                <h3 class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2">Temperatur</h3>
+                <h3 class="font-bold text-orange-600 mt-2">TEMPERATUR (°C)</h3>
             </div>
         </div>
+
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
+            <div>
+                <h2 class="text-xl font-bold">Data Log Terkini</h2>
+                <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="clearAllData()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-500 hover:text-white transition-all">Clear All</button>
+                <button onclick="fetchData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all">Refresh</button>
+            </div>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
-          <table id="iotTable" class="display responsive nowrap w-full text-slate-700" style="width:100%">
+            <table id="iotTable" class="display responsive nowrap w-full" style="width:100%">
                 <thead>
-                    <tr class="text-left uppercase text-[10px] font-bold text-slate-400 tracking-widest border-b border-slate-100">
-                        <th class="px-4 py-4 text-blue-600">Turbidity (NTU)</th>
-                        <th class="px-4 py-4 text-emerald-600">pH Air</th>
-                        <th class="px-4 py-4 text-orange-600">Suhu (°C)</th>
-                        <th class="px-4 py-4">Waktu Check</th>
-                        <th class="px-4 py-4">Opsi</th>
+                    <tr class="text-slate-500 text-xs">
+                        <th>TURBIDITY</th>
+                        <th>pH</th>
+                        <th>SUHU</th>
+                        <th>WAKTU</th>
+                        <th>AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -76,157 +60,84 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/master/gauge.min.js"></script>
+
     <script>
-        let table;
-       $(document).ready(function() {
-            // Inisialisasi DataTable
+        let table, gaugeTurb, gaugePH, gaugeTemp;
+
+        $(document).ready(function() {
+            // 1. Inisialisasi Gauges
+            gaugeTurb = new RadialGauge({
+                renderTo: 'gauge-turbidity', width: 180, height: 180, units: "NTU", minValue: 0, maxValue: 1000,
+                majorTicks: ["0","200","400","600","800","1000"], highlights: [{ "from": 600, "to": 1000, "color": "#fee2e2" }],
+                colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500
+            }).draw();
+
+            gaugePH = new RadialGauge({
+                renderTo: 'gauge-ph', width: 180, height: 180, units: "pH", minValue: 0, maxValue: 14,
+                majorTicks: ["0","2","4","6","8","10","12","14"],
+                highlights: [{ "from": 0, "to": 6.5, "color": "#fee2e2" }, { "from": 6.5, "to": 8.5, "color": "#dcfce7" }],
+                colorPlate: "#fff", borders: false, needleType: "arrow", animationDuration: 1500
+            }).draw();
+
+            gaugeTemp = new LinearGauge({
+                renderTo: 'gauge-temp', width: 100, height: 180, units: "°C", minValue: -20, maxValue: 50,
+                majorTicks: ["-20","0","20","50"], colorPlate: "#fff", borders: false, animationDuration: 1500
+            }).draw();
+
+            // 2. Inisialisasi DataTable
             table = $('#iotTable').DataTable({
                 responsive: true,
-                order: [[0, 'desc']],
-                pageLength: 10,
-                language: { search: "Cari:", lengthMenu: "Tampil _MENU_", info: "Total: _TOTAL_ data" }
+                order: [[3, 'desc']], // Urutkan berdasarkan kolom waktu
+                language: { search: "Cari:", lengthMenu: "Tampil _MENU_" }
             });
-        
-            // Ambil data pertama kali
+
+            // 3. Start Polling
             fetchData();
-        
-            // --- KODE LIVE UPDATE START ---
-            // Fungsi ini akan menjalankan fetchData setiap 5000ms (5 detik)
-            setInterval(() => {
-                console.log("Auto Refreshing Data...");
-                fetchData(true); // Kirim parameter true agar tidak mengganggu fokus user
-            }, 5000); 
-            // --- KODE LIVE UPDATE END ---
+            setInterval(() => fetchData(true), 5000); // Live update tiap 5 detik
         });
-        
-       async function fetchData(isAuto = false) {
-                try {
-                    const res = await fetch('/api');
-                    const data = await res.json();
-                    
-                    table.clear();
-                    data.forEach(item => {
-                        const date = new Date(item.createdAt).toLocaleString('id-ID', {
-                            dateStyle: 'short',
-                            timeStyle: 'short'
-                        });
-                        
-                        const ph = item.ph || 0;
-                        const turbidity = item.turbidity || 0;
-                        const temp = item.temperature || item.temp || 0;
-            
-                        // Logika Warna Prioritas
-                        const phClass = (ph < 6.5 || ph > 8.5) ? 'text-red-600 font-extrabold' : 'text-slate-900 font-bold';
-                        const turbClass = (turbidity > 50) ? 'text-amber-600 font-extrabold' : 'text-slate-900 font-bold';
-            
-                        table.row.add([
-                            `<span class="text-lg ${turbClass}">${turbidity}</span>`,
-                            `<span class="text-lg ${phClass}">${ph}</span>`,
-                            `<span class="text-lg font-bold text-slate-900">${temp}°</span>`,
-                            `<span class="text-xs text-slate-400 font-mono">${date}</span>`,
-                            `<button onclick="deleteData('${item._id}')" class="text-red-400 hover:text-red-600 transition-colors text-xs font-semibold underline">Hapus</button>`
-                        ]);
-                    });
-            
-                    // 'false' agar saat auto-refresh, posisi paging user tidak balik ke halaman 1
-                    table.draw(false); 
-                    document.getElementById('lastUpdate').innerText = "Sync: " + new Date().toLocaleTimeString();
-                } catch (err) { 
-                    console.error("Fetch error:", err); 
+
+        async function fetchData(isAuto = false) {
+            try {
+                const res = await fetch('/api');
+                const data = await res.json();
+                
+                if (data.length > 0) {
+                    const latest = data[0];
+                    gaugeTurb.value = latest.turbidity || 0;
+                    gaugePH.value = latest.ph || 0;
+                    gaugeTemp.value = latest.temperature || latest.temp || 0;
                 }
-            }
-                    
+
+                table.clear();
+                data.forEach(item => {
+                    const date = new Date(item.createdAt).toLocaleString('id-ID');
+                    table.row.add([
+                        `<span class="font-bold text-lg">${item.turbidity || 0}</span>`,
+                        `<span class="font-bold text-lg">${item.ph || 0}</span>`,
+                        `<span class="font-bold text-lg text-blue-600">${item.temperature || item.temp || 0}°C</span>`,
+                        `<span class="text-xs text-slate-400 font-mono">${date}</span>`,
+                        `<button onclick="deleteData('${item._id}')" class="text-red-500 underline text-xs">Hapus</button>`
+                    ]);
+                });
+                table.draw(isAuto ? false : true);
+                document.getElementById('lastUpdate').innerText = "Update: " + new Date().toLocaleTimeString();
+            } catch (err) { console.error("Error:", err); }
+        }
+
         async function deleteData(id) {
-            if (confirm('Yakin ingin menghapus data ini?')) {
-                try {
-                    const res = await fetch(`/api?id=${id}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        alert('Data berhasil dihapus');
-                        fetchData();
-                    } else {
-                        alert('Gagal menghapus data');
-                    }
-                } catch (err) {
-                    console.error("Error delete:", err);
-                }
+            if (confirm('Hapus data ini?')) {
+                await fetch(`/api?id=${id}`, { method: 'DELETE' });
+                fetchData();
             }
         }
+
         async function clearAllData() {
-            if (confirm('PERINGATAN: Semua data sensor akan dihapus permanen. Lanjutkan?')) {
-                try {
-                    const res = await fetch('/api', { method: 'DELETE' }); // Panggil tanpa query ID
-                    const result = await res.json();
-                    
-                    if (res.ok) {
-                        alert(result.message);
-                        fetchData(); // Refresh tabel
-                    } else {
-                        alert('Gagal membersihkan data: ' + result.error);
-                    }
-                } catch (err) {
-                    console.error("Error Clear All:", err);
-                }
+            if (confirm('Hapus SEMUA data?')) {
+                await fetch('/api', { method: 'DELETE' });
+                fetchData();
             }
         }
     </script>
-    <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/master/gauge.min.js"></script>
-
-<script>
-    // Inisialisasi Variabel Gauge
-    let gaugeTurb, gaugePH, gaugeTemp;
-
-    $(document).ready(function() {
-        // Setup Gauge Turbidity (0 - 1000 NTU)
-        gaugeTurb = new RadialGauge({
-            renderTo: 'gauge-turbidity', width: 200, height: 200, units: "NTU", minValue: 0, maxValue: 1000,
-            majorTicks: ["0","200","400","600","800","1000"], minorTicks: 2, strokeTicks: true,
-            highlights: [{ "from": 600, "to": 1000, "color": "rgba(200, 50, 50, .75)" }],
-            colorPlate: "#fff", borderShadowWidth: 0, borders: false, needleType: "arrow", needleWidth: 2,
-            needleCircleSize: 7, needleCircleOuter: true, needleCircleInner: false, animationDuration: 1500, animationRule: "linear"
-        }).draw();
-
-        // Setup Gauge pH (0 - 14 pH)
-        gaugePH = new RadialGauge({
-            renderTo: 'gauge-ph', width: 200, height: 200, units: "pH", minValue: 0, maxValue: 14,
-            majorTicks: ["0","2","4","6","8","10","12","14"], minorTicks: 2, strokeTicks: true,
-            highlights: [
-                { "from": 0, "to": 6.5, "color": "rgba(255, 0, 0, .3)" },
-                { "from": 6.5, "to": 8.5, "color": "rgba(0, 255, 0, .3)" },
-                { "from": 8.5, "to": 14, "color": "rgba(0, 0, 255, .3)" }
-            ],
-            colorPlate: "#fff", borderShadowWidth: 0, borders: false, needleType: "arrow", animationDuration: 1500
-        }).draw();
-
-        // Setup Gauge Temp (-20 - 50 Celcius)
-        gaugeTemp = new LinearGauge({
-            renderTo: 'gauge-temp', width: 120, height: 200, units: "°C", minValue: -20, maxValue: 50,
-            majorTicks: ["-20","-10","0","10","20","30","40","50"], minorTicks: 2, strokeTicks: true,
-            highlights: [{ "from": 35, "to": 50, "color": "rgba(200, 50, 50, .75)" }],
-            colorPlate: "#fff", borderShadowWidth: 0, borders: false, barBeginCircle: false, tickSide: "left",
-            numberSide: "left", needleSide: "left", needleType: "line", needleWidth: 3, animationDuration: 1500
-        }).draw();
-
-        // Panggil fetchData yang sudah ada
-        fetchData();
-    });
-
-    // Update fungsi fetchData kamu agar menggerakkan jarum gauge
-    async function fetchData(isAuto = false) {
-        try {
-            const res = await fetch('/api');
-            const data = await res.json();
-            if (data.length > 0) {
-                const latest = data[0]; // Ambil data paling baru (indeks 0 karena sorted desc)
-                
-                // Update Nilai ke Gauge
-                gaugeTurb.value = latest.turbidity || 0;
-                gaugePH.value = latest.ph || 0;
-                gaugeTemp.value = latest.temperature || latest.temp || 0;
-            }
-            
-            // ... (Kode table.clear() dan table.draw() yang sudah kamu punya tetap di sini) ...
-        } catch (err) { console.error(err); }
-    }
-</script>
 </body>
 </html>
