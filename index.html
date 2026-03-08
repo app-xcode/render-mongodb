@@ -41,6 +41,22 @@
                 </div>
             </div>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 flex flex-col items-center">
+                <canvas id="gauge-turbidity"></canvas>
+                <h3 class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2">Turbidity</h3>
+            </div>
+        
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 flex flex-col items-center">
+                <canvas id="gauge-ph"></canvas>
+                <h3 class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2">pH Air</h3>
+            </div>
+        
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 flex flex-col items-center">
+                <canvas id="gauge-temp"></canvas>
+                <h3 class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-2">Temperatur</h3>
+            </div>
+        </div>
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
           <table id="iotTable" class="display responsive nowrap w-full text-slate-700" style="width:100%">
                 <thead>
@@ -153,5 +169,64 @@
             }
         }
     </script>
+    <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/master/gauge.min.js"></script>
+
+<script>
+    // Inisialisasi Variabel Gauge
+    let gaugeTurb, gaugePH, gaugeTemp;
+
+    $(document).ready(function() {
+        // Setup Gauge Turbidity (0 - 1000 NTU)
+        gaugeTurb = new RadialGauge({
+            renderTo: 'gauge-turbidity', width: 200, height: 200, units: "NTU", minValue: 0, maxValue: 1000,
+            majorTicks: ["0","200","400","600","800","1000"], minorTicks: 2, strokeTicks: true,
+            highlights: [{ "from": 600, "to": 1000, "color": "rgba(200, 50, 50, .75)" }],
+            colorPlate: "#fff", borderShadowWidth: 0, borders: false, needleType: "arrow", needleWidth: 2,
+            needleCircleSize: 7, needleCircleOuter: true, needleCircleInner: false, animationDuration: 1500, animationRule: "linear"
+        }).draw();
+
+        // Setup Gauge pH (0 - 14 pH)
+        gaugePH = new RadialGauge({
+            renderTo: 'gauge-ph', width: 200, height: 200, units: "pH", minValue: 0, maxValue: 14,
+            majorTicks: ["0","2","4","6","8","10","12","14"], minorTicks: 2, strokeTicks: true,
+            highlights: [
+                { "from": 0, "to": 6.5, "color": "rgba(255, 0, 0, .3)" },
+                { "from": 6.5, "to": 8.5, "color": "rgba(0, 255, 0, .3)" },
+                { "from": 8.5, "to": 14, "color": "rgba(0, 0, 255, .3)" }
+            ],
+            colorPlate: "#fff", borderShadowWidth: 0, borders: false, needleType: "arrow", animationDuration: 1500
+        }).draw();
+
+        // Setup Gauge Temp (-20 - 50 Celcius)
+        gaugeTemp = new LinearGauge({
+            renderTo: 'gauge-temp', width: 120, height: 200, units: "°C", minValue: -20, maxValue: 50,
+            majorTicks: ["-20","-10","0","10","20","30","40","50"], minorTicks: 2, strokeTicks: true,
+            highlights: [{ "from": 35, "to": 50, "color": "rgba(200, 50, 50, .75)" }],
+            colorPlate: "#fff", borderShadowWidth: 0, borders: false, barBeginCircle: false, tickSide: "left",
+            numberSide: "left", needleSide: "left", needleType: "line", needleWidth: 3, animationDuration: 1500
+        }).draw();
+
+        // Panggil fetchData yang sudah ada
+        fetchData();
+    });
+
+    // Update fungsi fetchData kamu agar menggerakkan jarum gauge
+    async function fetchData(isAuto = false) {
+        try {
+            const res = await fetch('/api');
+            const data = await res.json();
+            if (data.length > 0) {
+                const latest = data[0]; // Ambil data paling baru (indeks 0 karena sorted desc)
+                
+                // Update Nilai ke Gauge
+                gaugeTurb.value = latest.turbidity || 0;
+                gaugePH.value = latest.ph || 0;
+                gaugeTemp.value = latest.temperature || latest.temp || 0;
+            }
+            
+            // ... (Kode table.clear() dan table.draw() yang sudah kamu punya tetap di sini) ...
+        } catch (err) { console.error(err); }
+    }
+</script>
 </body>
 </html>
