@@ -45,7 +45,7 @@ app.post('/api', async (req, res) => {
     };
 
     console.log("Data yang akan disimpan:", newDoc);
-
+    const result = await collection.insertOne(newDoc);
     res.status(201).json({ 
       message: "Data tersimpan!", 
       id: result.insertedId 
@@ -57,6 +57,7 @@ app.post('/api', async (req, res) => {
 });
 
 module.exports = app;
+
 
 
 
