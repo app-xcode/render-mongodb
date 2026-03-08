@@ -147,7 +147,10 @@
                         {
                             label: "Turbidity",
                             tension: 0.4,
-                            pointRadius: 0,
+                            pointRadius: 4, // Ubah jadi 4 agar titik terlihat
+                            pointBackgroundColor: "#3b82f6",
+                            pointBorderColor: "#fff",
+                            pointHoverRadius: 6,
                             borderColor: "#3b82f6",
                             borderWidth: 3,
                             backgroundColor: gradBlue,
@@ -157,7 +160,10 @@
                         {
                             label: "pH Air",
                             tension: 0.4,
-                            pointRadius: 0,
+                            pointRadius: 4,
+                            pointBackgroundColor: "#fe2a90",
+                            pointBorderColor: "#fff",
+                            pointHoverRadius: 6,
                             borderColor: "#fe2a90",
                             borderWidth: 3,
                             backgroundColor: gradPink,
@@ -167,7 +173,10 @@
                         {
                             label: "Suhu",
                             tension: 0.4,
-                            pointRadius: 0,
+                            pointRadius: 4,
+                            pointBackgroundColor: "#ffae4a",
+                            pointBorderColor: "#fff",
+                            pointHoverRadius: 6,
                             borderColor: "#ffae4a",
                             borderWidth: 3,
                             backgroundColor: gradOrange,
@@ -179,54 +188,53 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false, // Agar tooltip muncul meski kursor tidak pas di titiknya
+                    },
                     plugins: {
+                        legend: { display: false },
                         tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#334155',
+                            bodyColor: '#334155',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: true,
                             callbacks: {
                                 label: function (context) {
                                     let label = context.dataset.label || '';
-                                    let value = context.parsed.y;
-                                    // Kembalikan ke nilai asli saat di-hover
-                                    if (label === 'Turbidity') return label + ': ' + (value * 10).toFixed(0) + ' NTU';
-                                    if (label === 'pH Air') return label + ': ' + (value * 0.14).toFixed(1) + ' pH';
-                                    if (label === 'Suhu') return label + ': ' + (value * 0.5).toFixed(1) + ' °C';
-                                    return label + ': ' + value + '%';
+                                    let val = context.parsed.y;
+                                    // Konversi balik dari % ke nilai asli untuk tooltip
+                                    if (label === 'Turbidity') return label + ': ' + (val * 10).toFixed(0) + ' NTU';
+                                    if (label === 'pH Air') return label + ': ' + (val * 0.14).toFixed(1) + ' pH';
+                                    if (label === 'Suhu') return label + ': ' + (val * 0.5).toFixed(1) + ' °C';
+                                    return label + ': ' + val;
                                 }
                             }
                         }
                     },
                     scales: {
                         y: {
+                            min: 0,
+                            max: 100,
                             grid: {
                                 drawBorder: false,
                                 display: true,
-                                drawOnChartArea: true,
-                                drawTicks: false,
-                                borderDash: [5, 5],
-                                min: 0,
-                                max: 100, // Kunci di 100%
+                                color: 'rgba(0, 0, 0, 0.05)', // Garis Horizontal
+                                borderDash: [5, 5]
                             },
-                            ticks: {
-                                display: true,
-                                padding: 10,
-                                color: '#b2b9bf',
-                                font: { size: 11, family: "Open Sans", style: 'normal', lineHeight: 2 },
-                                callback: function (value) { return value + "%" }
-                            }
+                            ticks: { padding: 10, color: '#94a3b8' }
                         },
                         x: {
                             grid: {
-                                drawBorder: false,
-                                display: false,
-                                drawOnChartArea: false,
-                                drawTicks: false,
+                                display: true, // AKTIFKAN GRID VERTIKAL
+                                color: 'rgba(0, 0, 0, 0.05)',
                                 borderDash: [5, 5]
                             },
-                            ticks: {
-                                display: true,
-                                color: '#b2b9bf',
-                                padding: 20,
-                                font: { size: 11, family: "Open Sans", style: 'normal', lineHeight: 2 },
-                            }
+                            ticks: { padding: 10, color: '#94a3b8' }
                         }
                     }
                 }
