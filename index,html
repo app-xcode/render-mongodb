@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html>
+<head><title>API Sensor IoT</title></head>
+<body>
+    <h1>Server API IoT Aktif</h1>
+    <p>Gunakan endpoint <a href="/api/sensor">/api/sensor</a> untuk melihat data.</p>
+</body>
+</html>
