@@ -15,6 +15,17 @@
 <body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
 
     <div class="max-w-6xl mx-auto">
+         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
+                <div>
+                    <h2 class="text-xl font-bold">Monitoring Air</h2>
+                    <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="clearAllData()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-500 hover:text-white transition-all">Clear All</button>
+                    <button onclick="fetchData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all">Refresh</button>
+                </div>
+            </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
                 <canvas id="gauge-turbidity"></canvas>
@@ -30,18 +41,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center border border-slate-200">
-            <div>
-                <h2 class="text-xl font-bold">Data Log Terkini</h2>
-                <p id="lastUpdate" class="text-xs text-slate-400 font-mono">Menghubungkan...</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="clearAllData()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-500 hover:text-white transition-all">Clear All</button>
-                <button onclick="fetchData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all">Refresh</button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+          <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
             <table id="iotTable" class="display responsive nowrap w-full" style="width:100%">
                 <thead>
                     <tr class="text-slate-500 text-xs">
