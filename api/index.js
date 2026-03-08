@@ -1,97 +1,60 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
-const cors = require('cors');
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const uri = process.env.MONGO_URI;
+const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
-// Handler untuk menghapus data
-app.delete('/api', async (req, res) => {
-  try {
-    const { id } = req.query; // Mengambil ID dari URL (?id=xxxx)
-    
-    if (!id) {
-      return res.status(400).json({ error: "ID tidak ditemukan" });
+// HANDLER UTAMA
+app.all('/api', async (req, res) => {
+    try {
+        await client.connect();
+        const db = client.db("iot_db");
+        const collection = db.collection("sensor_data");
+
+        // 1. MENGAMBIL DATA (GET)
+        if (req.method === 'GET') {
+            const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
+            return res.status(200).json(data);
+        }
+
+        // 2. MENYIMPAN DATA (POST)
+        if (req.method === 'POST') {
+            console.log("Data Masuk:", req.body);
+            const newDoc = {
+                turbidity: Number(req.body.turbidity) || 0,
+                ph: Number(req.body.ph) || 0,
+                temperature: Number(req.body.temp || req.body.temperature) || 0,
+                createdAt: new Date()
+            };
+            const result = await collection.insertOne(newDoc);
+            return res.status(201).json(result);
+        }
+
+        // 3. MENGHAPUS DATA (DELETE)
+        if (req.method === 'DELETE') {
+            const { id } = req.query;
+            if (!id) return res.status(400).json({ error: "ID dibutuhkan" });
+
+            const result = await collection.deleteOne({ _id: new ObjectId(id) });
+            
+            if (result.deletedCount === 1) {
+                return res.status(200).json({ message: "Berhasil dihapus" });
+            } else {
+                return res.status(404).json({ error: "Data tidak ditemukan" });
+            }
+        }
+
+        res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
     }
-
-    await client.connect();
-    const db = client.db("iot_db");
-    
-    const result = await db.collection("sensor_data").deleteOne({
-      _id: new ObjectId(id) // Mengonversi string ID menjadi format MongoDB ObjectId
-    });
-
-    if (result.deletedCount === 1) {
-      res.status(200).json({ message: "Data berhasil dihapus" });
-    } else {
-      res.status(404).json({ error: "Data tidak ditemukan di database" });
-    }
-  } catch (error) {
-    console.error("Delete Error:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-// 1. [GET] Cek Status API
-app.get('/api', async (req, res) => {
-  try {
-    await client.connect();
-    const db = client.db("iot_db");
-    const collection = db.collection("sensor_data");
-
-    // Ambil 20 data terbaru berdasarkan waktu (createdAt)
-    const data = await collection.find({})
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .toArray();
-
-    res.status(200).json(data);
-  } catch (error) {
-    console.error("Error GET:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 3. [POST] Menerima Data dari ESP32/Alat
-// Akses: https://render-mongodb.vercel.app/api/sensor
-app.post('/api', async (req, res) => {
-  try {
-    await client.connect();
-    const db = client.db("iot_db");
-    const collection = db.collection("sensor_data");
-
-    const newDoc = {
-      turbidity: Number(req.body.turbidity),
-      ph: Number(req.body.ph),
-      temperature: Number(req.body.temp), // Gunakan 'temp' sesuai log kamu
-      createdAt: new Date()
-    };
-
-    console.log("Data yang akan disimpan:", req.body);
-    const result = await collection.insertOne(newDoc);
-    res.status(201).json({ 
-      message: "Data tersimpan!", 
-      id: result.insertedId 
-    });
-  } catch (error) {
-    console.error("Error POST:", error);
-    res.status(500).json({ error: error.message });
-  }
 });
 
 module.exports = app;
-
-
-
-
-
-
-
-
-
-
-
-
