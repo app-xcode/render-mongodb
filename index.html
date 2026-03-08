@@ -96,7 +96,7 @@
 
         async function fetchData() {
             try {
-                const res = await fetch('/api/sensor');
+                const res = await fetch('?');
                 const data = await res.json();
                 
                 table.clear(); // Bersihkan data lama
