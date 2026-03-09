@@ -371,7 +371,7 @@
                 }
             } catch (err) { console.error("Error:", err); }
             finally {
-                isAuto && setTimeout(() => fetchData(true), 5000); // Jadwalkan polling berikutnya hanya jika ini adalah update otomatis
+                isAuto && fetchData(true); // Jadwalkan polling berikutnya hanya jika ini adalah update otomatis
             }
         }
 
