@@ -377,7 +377,7 @@
 
         async function deleteData(id) {
             if (confirm('Hapus data ini?')) {
-                await fetch(`cd https://render-mongodb.vercel.app/api?id=${id}`, { method: 'DELETE' });
+                await fetch(`https://render-mongodb.vercel.app/api?id=${id}`, { method: 'DELETE' });
                 fetchData();
             }
         }
