@@ -43,46 +43,45 @@ app.all('/api', async (req, res) => {
                 return res.status(200).json({ status: "success", data: data });
             }
         }
-    }
 
         // 2. MENYIMPAN DATA (POST)
         if (req.method === 'POST') {
-        console.log("Data Masuk:", req.body);
-        const newDoc = {
-            turbidity: Number(req.body.turbidity) || 0,
-            ph: Number(req.body.ph) || 0,
-            temperature: Number(req.body.temp || req.body.temperature) || 0,
-            createdAt: new Date()
-        };
-        const result = await collection.insertOne(newDoc);
-        return res.status(201).json(result);
-    }
-
-    // 3. MENGHAPUS DATA (DELETE)
-    // 3. MENGHAPUS DATA (DELETE)
-    if (req.method === 'DELETE') {
-        const { id } = req.query;
-
-        if (id) {
-            // Hapus satu data berdasarkan ID
-            const result = await collection.deleteOne({ _id: new ObjectId(id) });
-            return res.status(200).json({ message: "Data berhasil dihapus" });
-        } else {
-            // Hapus SEMUA data jika ID tidak disertakan
-            const result = await collection.deleteMany({});
-            return res.status(200).json({
-                message: `Semua data (${result.deletedCount}) berhasil dibersihkan`
-            });
+            console.log("Data Masuk:", req.body);
+            const newDoc = {
+                turbidity: Number(req.body.turbidity) || 0,
+                ph: Number(req.body.ph) || 0,
+                temperature: Number(req.body.temp || req.body.temperature) || 0,
+                createdAt: new Date()
+            };
+            const result = await collection.insertOne(newDoc);
+            return res.status(201).json(result);
         }
+
+        // 3. MENGHAPUS DATA (DELETE)
+        // 3. MENGHAPUS DATA (DELETE)
+        if (req.method === 'DELETE') {
+            const { id } = req.query;
+
+            if (id) {
+                // Hapus satu data berdasarkan ID
+                const result = await collection.deleteOne({ _id: new ObjectId(id) });
+                return res.status(200).json({ message: "Data berhasil dihapus" });
+            } else {
+                // Hapus SEMUA data jika ID tidak disertakan
+                const result = await collection.deleteMany({});
+                return res.status(200).json({
+                    message: `Semua data (${result.deletedCount}) berhasil dibersihkan`
+                });
+            }
+        }
+
+        res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
     }
-
-    res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-
-} catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: error.message });
-}
 });
 
 module.exports = app;
