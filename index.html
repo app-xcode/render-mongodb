@@ -330,7 +330,7 @@
                 const respon = await res.json();
                 const data = respon.status == 'success' ? respon.data : [];
 
-                if ((data.length > 0 && data.length !== lastLength) || !isAuto) {
+                if ((data.length > 0 && data.length !== lastLength && respon.status === 'success') || !isAuto) {
                     const latest = data[0];
                     gaugeTurb.value = latest.turbidity || 0;
                     gaugePH.value = latest.ph || 0;
