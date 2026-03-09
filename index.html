@@ -315,10 +315,10 @@
 
         async function fetchData(isAuto = false) {
             try {
-                const res = await fetch('https://render-mongodb.vercel.app/api?last='+lastLength);
-                const data = await res.json();
+                const res = await fetch('https://render-mongodb.vercel.app/api?last='+ (isAuto ? '' :lastLength));
                 const status = await res.status;
-                console.log("Status:", status, "Data Length:", data.length);
+                console.log("Status:", status);
+                const data = await res.json();
 
 
                 if ((data.length > 0 && data.length !== lastLength) || !isAuto) {
