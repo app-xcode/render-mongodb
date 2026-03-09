@@ -312,14 +312,23 @@
         });
 
         let lastLength = 0; // Variabel untuk menyimpan panjang data terakhir
+        let setTimeoutId; // Variabel untuk menyimpan ID timeout agar bisa dibersihkan jika perlu
 
         async function fetchData(isAuto = false) {
             try {
-                const res = await fetch('https://render-mongodb.vercel.app/api?last='+ lastLength);
+                const res = await fetch('https://render-mongodb.vercel.app/api?last=' + lastLength);
                 const status = await res.status;
-                console.log("Status:", status);
-                const data = await res.json();
+                if (!res.ok && res.status !== 304) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
 
+                // Jika 304, kita bisa pilih untuk tidak lanjut ke .json() jika mau hemat CPU
+                if (res.status === 304) {
+                    console.log("Data masih segar di cache (304), tidak ada perubahan.");
+                    return; // Keluar dari fungsi, jangan update tabel
+                }
+                const respon = await res.json();
+                const data = respon.status == 'success' ? respon.data : [];
 
                 if ((data.length > 0 && data.length !== lastLength) || !isAuto) {
                     const latest = data[0];
@@ -369,11 +378,17 @@
                     document.getElementById('lastUpdate').innerText = "Update: " + new Date().toLocaleTimeString();
                     lastLength = data.length;
                 }
-            } catch (err) { console.error("Error:", err); }
+            } catch (err) {
+                console.error("Error:", err);
+            }
+
             finally {
-                isAuto && setTimeout(() => {
+                if (setTimeoutId) {
+                    clearTimeout(setTimeoutId); // Bersihkan timeout sebelumnya jika masih ada
+                }
+                isAuto && (setTimeoutId = setTimeout(() => {
                     fetchData(true)
-                }, 3000); // Jadwalkan polling berikutnya hanya jika ini adalah update otomatis
+                }, 3000)); // Jadwalkan polling berikutnya hanya jika ini adalah update otomatis
             }
         }
 
