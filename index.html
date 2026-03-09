@@ -352,7 +352,7 @@
                     sensorChart.data.datasets[2].data = chartData.map(d => d.temperature || d.temp || 0); // Nilai asli Celcius
 
                     sensorChart.update();
-                } else {
+                } else if(respon.status === 'success') {
                     gaugeTurb.value = 0;
                     gaugePH.value = 0;
                     gaugeTemp.value = 0;
