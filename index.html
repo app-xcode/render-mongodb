@@ -315,7 +315,7 @@
 
         async function fetchData(isAuto = false) {
             try {
-                const res = await fetch('https://render-mongodb.vercel.app/api?last='+ (isAuto ? '' :lastLength));
+                const res = await fetch('https://render-mongodb.vercel.app/api?last='+ lastLength);
                 const status = await res.status;
                 console.log("Status:", status);
                 const data = await res.json();
