@@ -306,17 +306,19 @@
             });
 
             // 3. Start Polling
-            fetchData();
-            setInterval(() => fetchData(true), 5000); // Live update tiap 5 detik
+            fetchData(true);
+            // setInterval(() => fetchData(true), 5000); // Live update tiap 5 detik
             // Jalankan saat load
         });
+
+        let lastLength = 0; // Variabel untuk menyimpan panjang data terakhir
 
         async function fetchData(isAuto = false) {
             try {
                 const res = await fetch('https://render-mongodb.vercel.app/api');
                 const data = await res.json();
 
-                if (data.length > 0) {
+                if (data.length > 0 && data.length !== lastLength) {
                     const latest = data[0];
                     gaugeTurb.value = latest.turbidity || 0;
                     gaugePH.value = latest.ph || 0;
@@ -348,20 +350,26 @@
                     sensorChart.update();
                 }
 
-                table.clear();
-                data.forEach(item => {
-                    const date = new Date(item.createdAt).toLocaleString('id-ID');
-                    table.row.add([
-                        `<span class="font-bold text-lg">${item.turbidity || 0}</span>`,
-                        `<span class="font-bold text-lg">${item.ph || 0}</span>`,
-                        `<span class="font-bold text-lg text-blue-600">${item.temperature || item.temp || 0}°C</span>`,
-                        `<span class="text-xs text-slate-400 font-mono">${date}</span>`,
-                        `<button onclick="deleteData('${item._id}')" class="text-red-500 underline text-xs">Hapus</button>`
-                    ]);
-                });
-                table.draw(isAuto ? false : true);
-                document.getElementById('lastUpdate').innerText = "Update: " + new Date().toLocaleTimeString();
+                if (data.length !== lastLength) {
+                    table.clear();
+                    data.forEach(item => {
+                        const date = new Date(item.createdAt).toLocaleString('id-ID');
+                        table.row.add([
+                            `<span class="font-bold text-lg">${item.turbidity || 0}</span>`,
+                            `<span class="font-bold text-lg">${item.ph || 0}</span>`,
+                            `<span class="font-bold text-lg text-blue-600">${item.temperature || item.temp || 0}°C</span>`,
+                            `<span class="text-xs text-slate-400 font-mono">${date}</span>`,
+                            `<button onclick="deleteData('${item._id}')" class="text-red-500 underline text-xs">Hapus</button>`
+                        ]);
+                    });
+                    table.draw(isAuto ? false : true);
+                    document.getElementById('lastUpdate').innerText = "Update: " + new Date().toLocaleTimeString();
+                    lastLength = data.length;
+                }
             } catch (err) { console.error("Error:", err); }
+            finally {
+                isAuto && setTimeout(() => fetchData(true), 5000); // Jadwalkan polling berikutnya hanya jika ini adalah update otomatis
+            }
         }
 
         async function deleteData(id) {
