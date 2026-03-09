@@ -34,7 +34,7 @@ app.all('/api', async (req, res) => {
             const { last } = req.query;
             const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
             if (data.length === Number(last)) {
-                return res.status(304).json(data);
+                return res.status(304).json({ message: "No new data" });
         } else {
             return res.status(200).json(data);
         }
