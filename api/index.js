@@ -30,13 +30,18 @@ app.all('/api', async (req, res) => {
         // ... sisa kode GET, POST, DELETE kamu ...
 
         // 1. MENGAMBIL DATA (GET)
+        // Di dalam route GET
         if (req.method === 'GET') {
             const { last } = req.query;
             const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
+
+            // Jika jumlah data sama, kirim status 200 tapi dengan body kosong/penanda
             if (data.length === Number(last)) {
-                return res.status(304).json({ message: "No new data" });
-        } else {
-            return res.status(200).json(data);
+                // Kita kirim status 200 agar header CORS tetap ikut terkirim dengan aman
+                return res.status(200).json({ status: "no_change", data: [] });
+            } else {
+                return res.status(200).json({ status: "success", data: data });
+            }
         }
     }
 
