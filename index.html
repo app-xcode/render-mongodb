@@ -313,24 +313,17 @@
 
         let lastLength = 0; // Variabel untuk menyimpan panjang data terakhir
         let setTimeoutId; // Variabel untuk menyimpan ID timeout agar bisa dibersihkan jika perlu
+        let lastData = []; // Variabel untuk menyimpan data terakhir yang diterima (bukan hanya panjangnya)
 
         async function fetchData(isAuto = false) {
             try {
                 const res = await fetch('https://render-mongodb.vercel.app/api?last=' + lastLength);
                 const status = await res.status;
-                if (!res.ok && res.status !== 304) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-
-                // Jika 304, kita bisa pilih untuk tidak lanjut ke .json() jika mau hemat CPU
-                if (res.status === 304) {
-                    console.log("Data masih segar di cache (304), tidak ada perubahan.");
-                    return; // Keluar dari fungsi, jangan update tabel
-                }
                 const respon = await res.json();
-                const data = respon.status == 'success' ? respon.data : [];
+                const data = respon.status == 'success' ? respon.data : lastData; // Jika gagal, gunakan data terakhir yang valid
+                lastData = data; // Simpan data yang baru diterima (baik itu data baru atau data lama jika fetch gagal)
 
-                if ((data.length > 0 && data.length !== lastLength && respon.status === 'success') || !isAuto) {
+                if ((data.length > 0 && data.length !== lastLength) || !isAuto) {
                     const latest = data[0];
                     gaugeTurb.value = latest.turbidity || 0;
                     gaugePH.value = latest.ph || 0;
@@ -352,7 +345,7 @@
                     sensorChart.data.datasets[2].data = chartData.map(d => d.temperature || d.temp || 0); // Nilai asli Celcius
 
                     sensorChart.update();
-                } else if(respon.status === 'success') {
+                } else if (respon.status === 'success') {
                     gaugeTurb.value = 0;
                     gaugePH.value = 0;
                     gaugeTemp.value = 0;
