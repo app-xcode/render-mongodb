@@ -84,7 +84,7 @@
                 <button onclick="clearAllData()"
                     class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100 hover:bg-red-500 hover:text-white transition-all">Clear
                     All</button>
-                <button onclick="fetchData()"
+                <button onclick="fetchData(true)"
                     class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all">Refresh</button>
             </div>
         </div>
@@ -315,10 +315,13 @@
 
         async function fetchData(isAuto = false) {
             try {
-                const res = await fetch('https://render-mongodb.vercel.app/api');
+                const res = await fetch('https://render-mongodb.vercel.app/api?last='+lastLength);
                 const data = await res.json();
+                const status = await res.status;
+                console.log("Status:", status, "Data Length:", data.length);
 
-                if (data.length > 0 && data.length !== lastLength) {
+
+                if ((data.length > 0 && data.length !== lastLength) || !isAuto) {
                     const latest = data[0];
                     gaugeTurb.value = latest.turbidity || 0;
                     gaugePH.value = latest.ph || 0;
@@ -350,7 +353,7 @@
                     sensorChart.update();
                 }
 
-                if (data.length !== lastLength) {
+                if (data.length !== lastLength || !isAuto) {
                     table.clear();
                     data.forEach(item => {
                         const date = new Date(item.createdAt).toLocaleString('id-ID');
@@ -374,7 +377,7 @@
 
         async function deleteData(id) {
             if (confirm('Hapus data ini?')) {
-                await fetch(`https://render-mongodb.vercel.app/api?id=${id}`, { method: 'DELETE' });
+                await fetch(`cd https://render-mongodb.vercel.app/api?id=${id}`, { method: 'DELETE' });
                 fetchData();
             }
         }
