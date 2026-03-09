@@ -33,7 +33,7 @@ app.all('/api', async (req, res) => {
         if (req.method === 'GET') {
             const { last } = req.query;
             const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
-            if (last && data.length !== Number(last)) {
+            if (data.length === Number(last)) {
                 return res.status(304).json(data);
         } else {
             return res.status(200).json(data);
