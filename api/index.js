@@ -38,8 +38,6 @@ app.all('/api', async (req, res) => {
             const length = parseInt(req.query.length);
 
             const search = req.query.search?.value || "";
-            console.log(search)
-            console.log(req.query.search)
 
             const orderColumnIndex = req.query.order?.[0]?.column;
             const orderDir = req.query.order?.[0]?.dir === "asc" ? 1 : -1;
@@ -67,7 +65,7 @@ app.all('/api', async (req, res) => {
                     .limit(length)
                     .toArray();
 
-                res.json({
+                return res.json({
                     draw: draw,
                     recordsTotal: total,
                     recordsFiltered: filtered,
