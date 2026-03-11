@@ -36,30 +36,50 @@ app.all('/api', async (req, res) => {
             const draw = parseInt(req.query.draw);
             const start = parseInt(req.query.start);
             const length = parseInt(req.query.length);
+
+            const search = req.query.search?.value || "";
+
+            const orderColumnIndex = req.query.order?.[0]?.column;
+            const orderDir = req.query.order?.[0]?.dir === "asc" ? 1 : -1;
+            const columns = ["turbidity", "ph", "temperature", "createdAt"];
+            const orderField = columns[orderColumnIndex] || "createdAt";
+            let filter = {};
+
+            if (search) {
+                filter = {
+                    $or: [
+                        { turbidity: { $regex: search, $options: "i" } },
+                        { ph: { $regex: search, $options: "i" } },
+                        { temperature: { $regex: search, $options: "i" } }
+                    ]
+                };
+            }
             const total = await collection.countDocuments();
-            if(draw){
-                const data = await collection.find()
-                    .sort({ createdAt: -1 })
+
+            const filtered = await collection.countDocuments(filter);
+
+            if (last == undefined) {
+                const data = await collection.find(filter)
+                    .sort({ [orderField]: orderDir })
                     .skip(start)
                     .limit(length)
-                    .lean();
+                    .toArray();
+
                 res.json({
                     draw: draw,
                     recordsTotal: total,
-                    recordsFiltered: total,
+                    recordsFiltered: filtered,
                     data: data
                 });
-            }else{
+            } else {
                 const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
+                if (data.length === Number(last)) {
+                    return res.status(200).json({ status: "no_change", data: [] });
+                } else {
+                    return res.status(200).json({ status: "success", data: data });
+                }
             }
 
-            // Jika jumlah data sama, kirim status 200 tapi dengan body kosong/penanda
-            if (data.length === Number(last)) {
-                // Kita kirim status 200 agar header CORS tetap ikut terkirim dengan aman
-                return res.status(200).json({ status: "no_change", data: [] });
-            } else {
-                return res.status(200).json({ status: "success", data: data });
-            }
         }
 
         // 2. MENYIMPAN DATA (POST)
