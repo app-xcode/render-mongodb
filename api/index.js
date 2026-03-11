@@ -48,9 +48,30 @@ app.all('/api', async (req, res) => {
             if (search) {
                 filter = {
                     $or: [
-                        { turbidity: { $regex: search, $options: "i" } },
-                        { ph: { $regex: search, $options: "i" } },
-                        { temperature: { $regex: search, $options: "i" } }
+                        {
+                            $expr: {
+                                $regexMatch: {
+                                    input: { $toString: "$turbidity" },
+                                    regex: search
+                                }
+                            }
+                        },
+                        {
+                            $expr: {
+                                $regexMatch: {
+                                    input: { $toString: "$ph" },
+                                    regex: search
+                                }
+                            }
+                        },
+                        {
+                            $expr: {
+                                $regexMatch: {
+                                    input: { $toString: "$temperature" },
+                                    regex: search
+                                }
+                            }
+                        }
                     ]
                 };
             }
