@@ -33,7 +33,25 @@ app.all('/api', async (req, res) => {
         // Di dalam route GET
         if (req.method === 'GET') {
             const { last } = req.query;
-            const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
+            const draw = parseInt(req.query.draw);
+            const start = parseInt(req.query.start);
+            const length = parseInt(req.query.length);
+            const total = await collection.countDocuments();
+            if(draw){
+                const data = await collection.find()
+                    .sort({ createdAt: -1 })
+                    .skip(start)
+                    .limit(length)
+                    .lean();
+                res.json({
+                    draw: draw,
+                    recordsTotal: total,
+                    recordsFiltered: total,
+                    data: data
+                });
+            }else{
+                const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
+            }
 
             // Jika jumlah data sama, kirim status 200 tapi dengan body kosong/penanda
             if (data.length === Number(last)) {
